@@ -152,7 +152,7 @@ with st.form("query_form"):
         "IAS role as DC"
         "IAS role as Secretary"
     ]
-    selected_agents = st.multiselect(
+    selected_agents = st.multiselectbox(
         "🤝 Select agents to query:",
         options=agent_options
     )
@@ -263,6 +263,7 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
