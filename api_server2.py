@@ -58,7 +58,10 @@ st.markdown(
     .answer-Bhagwan_Budda {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-IAS_role_as_DC_Secretary {
+    .answer-IAS_role_as_DC {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    }
+    .answer-.answer-IAS role as Secretary {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
     </style>
@@ -120,7 +123,8 @@ sys3 = "You are Lord Krishna, answering with wisdom from the Bhagavad Gita, Maha
 sys4 = "you are a Dr. Ambedkar, give answers on your life experience and present time condition with also help of constitution. Answer will be best and short."
 sys5 = "you are a Bhagwan Mahaveer,answering with wisdom from the Jain Agamas or Agam Sutras,  teachings of Lord Mahavira,Ang-agams,Upang-agams and Darshan shastra  like all holly books in a compassionate tone.Answer will be best and short."
 sys6 = "you are a Bhagwan Gautam Buddha,answering with wisdom from The Tripitaka, Vinaya Pitaka,Sutta Pitaka and Abhidhamma Pitaka in a compassionate tone.Answer will be best and short."
-sys7 = "you are a IAS role as DC Secretary,answer a question as IAS as DC Secretary of india you have all power of this rule take decision and give best answer.Answer will be best and short."
+sys7 = "you are a IAS role as DC of Indian districts,answer a question as IAS as DC of india you have all power of this rule take decision and give best answer.Answer will be best and short."
+sys8 = "you are a IAS role as Secretary of Indian states,answer a question as IAS as Secretary of india you have all power of this rule take decision and give best answer.Answer will be best and short."
 # =========================
 # UI INPUT SECTION
 # =========================
@@ -145,12 +149,12 @@ with st.form("query_form"):
         "Dr. Ambedkar", 
         "Bhagwan Mahaveer", 
         "Bhagwan Budda",
-        "IAS role as DC Secretary"
+        "IAS role as DC"
+        "IAS role as Secretary"
     ]
     selected_agents = st.multiselect(
         "🤝 Select agents to query:",
-        options=agent_options,
-        default=agent_options
+        options=agent_options
     )
 
     submitted = st.form_submit_button("🚀 Get Answers")
@@ -233,7 +237,17 @@ if submitted:
         st.write(answer7)
         st.markdown('</div>', unsafe_allow_html=True)
         doc.add_heading("IAS role as DC Secretary", level=2)
-        doc.add_paragraph(answer7)    
+        doc.add_paragraph(answer7) 
+
+    if "IAS role as Secretary" in selected_agents:
+        raw_answer8 = query_model_with_fallback(sys8, user_question)
+        answer8 = translate_text(raw_answer7, lang_code)
+        st.markdown('<div class="answer-section answer-IAS role as Secretary">', unsafe_allow_html=True)
+        st.subheader("IAS role as Secretary")
+        st.write(answer8)
+        st.markdown('</div>', unsafe_allow_html=True)
+        doc.add_heading("IAS role as Secretary", level=2)
+        doc.add_paragraph(answer8) 
         
         
 
@@ -249,6 +263,7 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
