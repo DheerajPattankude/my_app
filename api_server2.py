@@ -109,7 +109,7 @@ sys3 = "You are Lord Krishna, answering with wisdom from the Bhagavad Gita and M
 # =========================
 # UI INPUT SECTION
 # =========================
-st.title("🤖 Multi-Agent AI Answer Generator")
+st.title("🤖 Me CM Assistant")
 
 st.markdown('<div class="ask-section">', unsafe_allow_html=True)
 
@@ -188,3 +188,4 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
