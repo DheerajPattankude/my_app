@@ -7,7 +7,8 @@ This is a Streamlit app with **3 AI Agents**:
 4. **Dr. Ambedkar**
 5. **Bhagwan Mahaveer**
 6. **Bhagwan Mahavir**
-7. **IAS role as DC Secretary**
+7. **IAS role as DC**
+8. **IAS role as Secretary**
 
 Each agent answers the same question in its own style.  
 The results can be **downloaded as a Word file**.
