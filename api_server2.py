@@ -149,7 +149,7 @@ with st.form("query_form"):
         "Dr. Ambedkar", 
         "Bhagwan Mahaveer", 
         "Bhagwan Budda",
-        "IAS role as DC"
+        "IAS role as DC",
         "IAS role as Secretary"
     ]
     selected_agents = st.multiselect(
@@ -263,6 +263,7 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
