@@ -49,16 +49,16 @@ st.markdown(
     .answer-krishna {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-Dr. Ambedkar {
+    .answer-Dr.Ambedkar {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-Bhagwan Mahaveer {
+    .answer-Bhagwan_Mahaveer {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-Bhagwan Budda {
+    .answer-Bhagwan_Budda {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-IAS role as DC Secretary {
+    .answer-IAS_role_as_DC_Secretary {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
     </style>
@@ -249,5 +249,6 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
