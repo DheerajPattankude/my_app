@@ -49,6 +49,18 @@ st.markdown(
     .answer-krishna {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
+    .answer-Dr. Ambedkar {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    }
+    .answer-Bhagwan Mahaveer {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    }
+    .answer-Bhagwan Budda {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    }
+    .answer-IAS role as DC Secretary {
+        background: linear-gradient(135deg, #ffecd2, #fcb69f);
+    }
     </style>
     """,
     unsafe_allow_html=True
@@ -104,8 +116,11 @@ def translate_text(text, target_lang):
 # =========================
 sys1 = "You are an experienced advisor in Indian educational institutions. Provide clear, well-structured answers."
 sys2 = "You are a police guideline officer in India. Give advice based on Indian law, safety, and real-world procedures."
-sys3 = "You are Lord Krishna, answering with wisdom from the Bhagavad Gita and Mahabharata, in a compassionate tone."
-
+sys3 = "You are Lord Krishna, answering with wisdom from the Bhagavad Gita, Mahabharata, The Vishnu Purana, Bhagavata Purana, Narada Purana, Garuda Purana, and Vayu Purana in a compassionate tone.Answer will be best and short."
+sys4 = "you are a Dr. Ambedkar, give answers on your life experience and present time condition with also help of constitution. Answer will be best and short."
+sys5 = "you are a Bhagwan Mahaveer,answering with wisdom from the Jain Agamas or Agam Sutras,  teachings of Lord Mahavira,Ang-agams,Upang-agams and Darshan shastra  like all holly books in a compassionate tone.Answer will be best and short."
+sys6 = "you are a Bhagwan Gautam Buddha,answering with wisdom from the "the Tripitaka", Vinaya Pitaka,Sutta Pitaka and Abhidhamma Pitaka in a compassionate tone.Answer will be best and short."
+sys7 = "you are a IAS role as DC Secretary,answer a question as IAS as DC Secretary of india you have all power of this rule take decision and give best answer.Answer will be best and short."
 # =========================
 # UI INPUT SECTION
 # =========================
@@ -126,7 +141,11 @@ with st.form("query_form"):
     agent_options = [
         "Indian Institution Advisor",
         "Police Guideline Officer",
-        "Lord Krishna"
+        "Lord Krishna",
+        "Dr. Ambedkar", 
+        "Bhagwan Mahaveer", 
+        "Bhagwan Budda",
+        "IAS role as DC Secretary"
     ]
     selected_agents = st.multiselect(
         "🤝 Select agents to query:",
@@ -176,6 +195,48 @@ if submitted:
         doc.add_heading("Lord Krishna", level=2)
         doc.add_paragraph(answer3)
 
+    if "Dr. Ambedkar" in selected_agents:
+        raw_answer4 = query_model_with_fallback(sys4, user_question)
+        answer4 = translate_text(raw_answer4, lang_code)
+        st.markdown('<div class="answer-section answer-Dr. Ambedkar">', unsafe_allow_html=True)
+        st.subheader("Dr. Ambedkar")
+        st.write(answer4)
+        st.markdown('</div>', unsafe_allow_html=True)
+        doc.add_heading("Dr. Ambedkar", level=2)
+        doc.add_paragraph(answer4)
+
+    if "Bhagwan Mahaveer" in selected_agents:
+        raw_answer5 = query_model_with_fallback(sys5, user_question)
+        answer5 = translate_text(raw_answer5, lang_code)
+        st.markdown('<div class="answer-section answer- Mahaveer">', unsafe_allow_html=True)
+        st.subheader("🕉 Bhagwan Mahaveer")
+        st.write(answer5)
+        st.markdown('</div>', unsafe_allow_html=True)
+        doc.add_heading("Bhagwan Mahaveer", level=2)
+        doc.add_paragraph(answer5)
+
+    if "Bhagwan Budda" in selected_agents:
+        raw_answer6 = query_model_with_fallback(sys6, user_question)
+        answer6 = translate_text(raw_answer6, lang_code)
+        st.markdown('<div class="answer-section answer-Goutam Budda">', unsafe_allow_html=True)
+        st.subheader("Bhagwan Budda")
+        st.write(answer6)
+        st.markdown('</div>', unsafe_allow_html=True)
+        doc.add_heading("Bhagwan Budda", level=2)
+        doc.add_paragraph(answer6)
+
+    if "IAS role as DC Secretary" in selected_agents:
+        raw_answer7 = query_model_with_fallback(sys7, user_question)
+        answer6 = translate_text(raw_answer7, lang_code)
+        st.markdown('<div class="answer-section answer-IAS role as DC Secretary">', unsafe_allow_html=True)
+        st.subheader("IAS role as DC Secretary")
+        st.write(answer7)
+        st.markdown('</div>', unsafe_allow_html=True)
+        doc.add_heading("IAS role as DC Secretary", level=2)
+        doc.add_paragraph(answer7)    
+        
+        
+
     # =========================
     # DOWNLOAD WORD FILE
     # =========================
@@ -188,4 +249,5 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
