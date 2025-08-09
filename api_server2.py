@@ -227,7 +227,7 @@ if submitted:
 
     if "IAS role as DC Secretary" in selected_agents:
         raw_answer7 = query_model_with_fallback(sys7, user_question)
-        answer6 = translate_text(raw_answer7, lang_code)
+        answer7 = translate_text(raw_answer7, lang_code)
         st.markdown('<div class="answer-section answer-IAS role as DC Secretary">', unsafe_allow_html=True)
         st.subheader("IAS role as DC Secretary")
         st.write(answer7)
@@ -249,6 +249,7 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
