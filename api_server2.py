@@ -58,10 +58,10 @@ st.markdown(
     .answer-Bhagwan_Budda {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-IAS_role_as_DC {
+    .answer-IAS role as DC {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
-    .answer-.answer-IAS role as Secretary {
+    .answer-IAS role as Secretary {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
     </style>
@@ -229,19 +229,19 @@ if submitted:
         doc.add_heading("Bhagwan Budda", level=2)
         doc.add_paragraph(answer6)
 
-    if "IAS role as DC Secretary" in selected_agents:
+    if "IAS role as DC" in selected_agents:
         raw_answer7 = query_model_with_fallback(sys7, user_question)
         answer7 = translate_text(raw_answer7, lang_code)
-        st.markdown('<div class="answer-section answer-IAS role as DC Secretary">', unsafe_allow_html=True)
-        st.subheader("IAS role as DC Secretary")
+        st.markdown('<div class="answer-section answer-IAS role as DC">', unsafe_allow_html=True)
+        st.subheader("IAS role as DC")
         st.write(answer7)
         st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("IAS role as DC Secretary", level=2)
+        doc.add_heading("IAS role as DC", level=2)
         doc.add_paragraph(answer7) 
 
     if "IAS role as Secretary" in selected_agents:
         raw_answer8 = query_model_with_fallback(sys8, user_question)
-        answer8 = translate_text(raw_answer7, lang_code)
+        answer8 = translate_text(raw_answer8, lang_code)
         st.markdown('<div class="answer-section answer-IAS role as Secretary">', unsafe_allow_html=True)
         st.subheader("IAS role as Secretary")
         st.write(answer8)
@@ -263,6 +263,7 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
