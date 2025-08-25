@@ -1,18 +1,15 @@
-
 import streamlit as st
 from docx import Document
 from io import BytesIO
 import os
 from openai import OpenAI
 from deep_translator import GoogleTranslator
-import time  # <-- added for delay
 
 # =========================
 # PAGE CONFIG & STYLE
 # =========================
 st.set_page_config(page_title="Multi-Agent AI", page_icon="🤖", layout="centered")
 
-# Custom CSS for styling
 st.markdown(
     """
     <style>
@@ -115,14 +112,12 @@ def query_model_combined(user_prompt, selected_agents):
     except Exception as e:
         return f"Error: {str(e)}"
 
-def translate_text_with_delay(text, target_lang):
-    """Translate text with a short delay to prevent rate limits."""
+def translate_batch_texts(text_list, target_lang):
+    """Translate all texts in one batch to prevent rate limits."""
     try:
-        result = GoogleTranslator(source="auto", target=target_lang).translate(text)
-        time.sleep(0.25)  # 4 requests/sec max
-        return result
+        return GoogleTranslator(source="auto", target=target_lang).translate_batch(text_list)
     except Exception as e:
-        return f"Translation Error: {str(e)}"
+        return [f"Translation Error: {str(e)}"] * len(text_list)
 
 # =========================
 # UI INPUT SECTION
@@ -161,11 +156,14 @@ if submitted and user_question and selected_agents:
         except:
             continue
 
-    # Display each agent's response with delay to prevent rate limit
-    for agent in selected_agents:
-        answer = responses.get(agent, "No answer generated.")
-        translated_answer = translate_text_with_delay(answer, lang_code)
+    # Prepare all answers for batch translation
+    answer_texts = [responses.get(agent, "No answer generated.") for agent in selected_agents]
 
+    # Batch translate
+    translated_texts = translate_batch_texts(answer_texts, lang_code)
+
+    # Display each agent's response
+    for agent, translated_answer in zip(selected_agents, translated_texts):
         css_class = (
             "answer-edu" if agent == "Indian Institution Advisor" else
             "answer-police" if agent == "Police Guideline Officer" else
@@ -197,4 +195,6 @@ if submitted and user_question and selected_agents:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
+
 
