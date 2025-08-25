@@ -1,7 +1,5 @@
 streamlit
-openai
 python-docx
-huggingface_hub
-transformers
-torch
-deep_translator
+openai
+deep-translator
+basedpyright
