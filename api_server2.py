@@ -40,28 +40,14 @@ st.markdown(
         color: #000;
         box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
     }
-    .answer-edu {
-        background: linear-gradient(135deg, #d4fc79, #96e6a1);
-    }
-    .answer-police {
-        background: linear-gradient(135deg, #fddb92, #d1fdff);
-    }
-    .answer-krishna {
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-    }
-    .answer-Dr.Ambedkar {
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-    }
-    .answer-Bhagwan_Mahaveer {
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-    }
-    .answer-Bhagwan_Budda {
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-    }
-    .answer-IAS role as DC {
-        background: linear-gradient(135deg, #ffecd2, #fcb69f);
-    }
-    .answer-IAS role as Secretary {
+    .answer-edu { background: linear-gradient(135deg, #d4fc79, #96e6a1); }
+    .answer-police { background: linear-gradient(135deg, #fddb92, #d1fdff); }
+    .answer-krishna,
+    .answer-Dr_Ambedkar,
+    .answer-Bhagwan_Mahaveer,
+    .answer-Bhagwan_Budda,
+    .answer-IAS_DC,
+    .answer-IAS_Secretary {
         background: linear-gradient(135deg, #ffecd2, #fcb69f);
     }
     </style>
@@ -86,20 +72,49 @@ LANGUAGE_CODES = {
 }
 
 # =========================
+# SYSTEM PROMPTS FOR AGENTS
+# =========================
+AGENT_PROMPTS = {
+    "Indian Institution Advisor": "you are a best experience lowyer of Indian constitution, give answer in simple language with IPC section and article, also refer previous case study , have references.",
+    "Police Guideline Officer": "You are a police guideline officer in India, Give advice based on Indian law, safety, and real-world procedures.",
+    "Lord Krishna": "You are Lord Krishna, answering with wisdom from the Bhagavad Gita, Mahabharata, The Vishnu Purana, Bhagavata Purana, Narada Purana, Garuda Purana, and Vayu Purana in a compassionate tone. Answer will be best and short.",
+    "Dr. Ambedkar": "You are Dr. Ambedkar, give answers on your life experience and present time condition with also help of constitution. Answer will be best and short.",
+    "Bhagwan Mahaveer": "You are Bhagwan Mahaveer, answering with wisdom from the Jain Agamas or Agam Sutras, teachings of Lord Mahavira, Ang-agams, Upang-agams and Darshan shastra like all holy books in a compassionate tone. Answer will be best and short.",
+    "Bhagwan Budda": "You are Bhagwan Gautam Buddha, answering with wisdom from The Tripitaka, Vinaya Pitaka, Sutta Pitaka and Abhidhamma Pitaka in a compassionate tone. Answer will be best and short.",
+    "IAS role as DC": "You are an IAS officer acting as DC of Indian districts, answer a question as IAS DC of India, you have all power of this role, take decision and give best answer,no need to hide, Answer will be best and short.",
+    "IAS role as Secretary": "You are an IAS officer acting as Secretary of Indian states, answer a question as IAS Secretary of India, you have all power of this role, take decision and give best answer, no need to hide, Answer will be best and short."
+}
+
+# =========================
 # OPENAI CLIENT
 # =========================
-client = OpenAI( base_url="https://router.huggingface.co/v1",
+client = OpenAI(
+    base_url="https://router.huggingface.co/v1",
     api_key=os.environ["HF_TOKEN"],
-    )
+)
 
-def query_model_with_fallback(system_prompt, user_prompt):
-    """Query OpenAI with fallback in case of errors."""
+def query_model_combined(user_prompt, selected_agents):
+    """Make one API call for all selected agents with their prompts."""
     try:
+        # Build combined system + user instructions
+        combined_instructions = "You are a multi-role assistant. For each role, follow its unique system prompt and answer separately. Format strictly:\n\n### <Role Name>:\nAnswer...\n\n"
+
+        role_texts = []
+        for agent in selected_agents:
+            sys_prompt = AGENT_PROMPTS[agent]
+            role_texts.append(f"Role: {agent}\nSystem Prompt: {sys_prompt}\n")
+
+        final_prompt = (
+            f"Question: {user_prompt}\n\n"
+            f"Provide answers for the following roles:\n\n" +
+            "\n".join(role_texts)
+        )
+
         response = client.chat.completions.create(
             model="meta-llama/Llama-3.1-8B-Instruct:cerebras",
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                {"role": "system", "content": combined_instructions},
+                {"role": "user", "content": final_prompt}
             ],
             temperature=0.7
         )
@@ -115,17 +130,6 @@ def translate_text(text, target_lang):
         return f"Translation Error: {str(e)}"
 
 # =========================
-# SYSTEM PROMPTS FOR AGENTS
-# =========================
-sys1 = "You are an experienced advisor in Indian educational institutions. Provide clear, well-structured answers."
-sys2 = "You are a police guideline officer in India. Give advice based on Indian law, safety, and real-world procedures."
-sys3 = "You are Lord Krishna, answering with wisdom from the Bhagavad Gita, Mahabharata, The Vishnu Purana, Bhagavata Purana, Narada Purana, Garuda Purana, and Vayu Purana in a compassionate tone.Answer will be best and short."
-sys4 = "you are a Dr. Ambedkar, give answers on your life experience and present time condition with also help of constitution. Answer will be best and short."
-sys5 = "you are a Bhagwan Mahaveer,answering with wisdom from the Jain Agamas or Agam Sutras,  teachings of Lord Mahavira,Ang-agams,Upang-agams and Darshan shastra  like all holly books in a compassionate tone.Answer will be best and short."
-sys6 = "you are a Bhagwan Gautam Buddha,answering with wisdom from The Tripitaka, Vinaya Pitaka,Sutta Pitaka and Abhidhamma Pitaka in a compassionate tone.Answer will be best and short."
-sys7 = "you are a IAS role as DC of Indian districts,answer a question as IAS as DC of india you have all power of this rule take decision and give best answer.Answer will be best and short."
-sys8 = "you are a IAS role as Secretary of Indian states,answer a question as IAS as Secretary of india you have all power of this rule take decision and give best answer.Answer will be best and short."
-# =========================
 # UI INPUT SECTION
 # =========================
 st.title("🤖 Me CM Assistant")
@@ -136,25 +140,12 @@ with st.form("query_form"):
     user_question = st.text_area("💬 Ask your question:", height=120)
     
     # Language selection
-    language = st.selectbox(
-        "🌐 Select language:",
-        list(LANGUAGE_CODES.keys())
-    )
+    language = st.selectbox("🌐 Select language:", list(LANGUAGE_CODES.keys()))
     
     # Agent selection
-    agent_options = [
-        "Indian Institution Advisor",
-        "Police Guideline Officer",
-        "Lord Krishna",
-        "Dr. Ambedkar", 
-        "Bhagwan Mahaveer", 
-        "Bhagwan Budda",
-        "IAS role as DC",
-        "IAS role as Secretary"
-    ]
+    agent_options = list(AGENT_PROMPTS.keys())
     selected_agents = st.multiselect(
-        "🤝 Select agents to query:",
-        options=agent_options
+        "🤝 Select agents to query:", options=agent_options
     )
 
     submitted = st.form_submit_button("🚀 Get Answers")
@@ -164,92 +155,49 @@ st.markdown('</div>', unsafe_allow_html=True)
 # =========================
 # PROCESSING
 # =========================
-if submitted:
+if submitted and user_question and selected_agents:
     doc = Document()
     doc.add_heading("AI Agent Responses", level=1)
     lang_code = LANGUAGE_CODES[language]
 
-    if "Indian Institution Advisor" in selected_agents:
-        raw_answer1 = query_model_with_fallback(sys1, user_question)
-        answer1 = translate_text(raw_answer1, lang_code)
-        st.markdown('<div class="answer-section answer-edu">', unsafe_allow_html=True)
-        st.subheader("🎓 Indian Institution Advisor")
-        st.write(answer1)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Indian Institution Advisor", level=2)
-        doc.add_paragraph(answer1)
+    # ONE API CALL
+    raw_response = query_model_combined(user_question, selected_agents)
 
-    if "Police Guideline Officer" in selected_agents:
-        raw_answer2 = query_model_with_fallback(sys2, user_question)
-        answer2 = translate_text(raw_answer2, lang_code)
-        st.markdown('<div class="answer-section answer-police">', unsafe_allow_html=True)
-        st.subheader("👮 Police Guideline Officer")
-        st.write(answer2)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Police Guideline Officer", level=2)
-        doc.add_paragraph(answer2)
+    # Parse by role (### markers)
+    responses = {}
+    for block in raw_response.split("### "):
+        if not block.strip():
+            continue
+        try:
+            role, answer = block.split(":", 1)
+            responses[role.strip()] = answer.strip()
+        except:
+            continue
 
-    if "Lord Krishna" in selected_agents:
-        raw_answer3 = query_model_with_fallback(sys3, user_question)
-        answer3 = translate_text(raw_answer3, lang_code)
-        st.markdown('<div class="answer-section answer-krishna">', unsafe_allow_html=True)
-        st.subheader("🕉 Lord Krishna")
-        st.write(answer3)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Lord Krishna", level=2)
-        doc.add_paragraph(answer3)
+    # Display each agent’s response
+    for agent in selected_agents:
+        answer = responses.get(agent, "No answer generated.")
+        translated_answer = translate_text(answer, lang_code)
 
-    if "Dr. Ambedkar" in selected_agents:
-        raw_answer4 = query_model_with_fallback(sys4, user_question)
-        answer4 = translate_text(raw_answer4, lang_code)
-        st.markdown('<div class="answer-section answer-Dr. Ambedkar">', unsafe_allow_html=True)
-        st.subheader("Dr. Ambedkar")
-        st.write(answer4)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Dr. Ambedkar", level=2)
-        doc.add_paragraph(answer4)
+        css_class = (
+            "answer-edu" if agent == "Indian Institution Advisor" else
+            "answer-police" if agent == "Police Guideline Officer" else
+            "answer-krishna" if agent == "Lord Krishna" else
+            "answer-Dr_Ambedkar" if agent == "Dr. Ambedkar" else
+            "answer-Bhagwan_Mahaveer" if agent == "Bhagwan Mahaveer" else
+            "answer-Bhagwan_Budda" if agent == "Bhagwan Budda" else
+            "answer-IAS_DC" if agent == "IAS role as DC" else
+            "answer-IAS_Secretary"
+        )
 
-    if "Bhagwan Mahaveer" in selected_agents:
-        raw_answer5 = query_model_with_fallback(sys5, user_question)
-        answer5 = translate_text(raw_answer5, lang_code)
-        st.markdown('<div class="answer-section answer- Mahaveer">', unsafe_allow_html=True)
-        st.subheader("🕉 Bhagwan Mahaveer")
-        st.write(answer5)
+        st.markdown(f'<div class="answer-section {css_class}">', unsafe_allow_html=True)
+        st.subheader(agent)
+        st.write(translated_answer)
         st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Bhagwan Mahaveer", level=2)
-        doc.add_paragraph(answer5)
 
-    if "Bhagwan Budda" in selected_agents:
-        raw_answer6 = query_model_with_fallback(sys6, user_question)
-        answer6 = translate_text(raw_answer6, lang_code)
-        st.markdown('<div class="answer-section answer-Goutam Budda">', unsafe_allow_html=True)
-        st.subheader("Bhagwan Budda")
-        st.write(answer6)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("Bhagwan Budda", level=2)
-        doc.add_paragraph(answer6)
-
-    if "IAS role as DC" in selected_agents:
-        raw_answer7 = query_model_with_fallback(sys7, user_question)
-        answer7 = translate_text(raw_answer7, lang_code)
-        st.markdown('<div class="answer-section answer-IAS role as DC">', unsafe_allow_html=True)
-        st.subheader("IAS role as DC")
-        st.write(answer7)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("IAS role as DC", level=2)
-        doc.add_paragraph(answer7) 
-
-    if "IAS role as Secretary" in selected_agents:
-        raw_answer8 = query_model_with_fallback(sys8, user_question)
-        answer8 = translate_text(raw_answer8, lang_code)
-        st.markdown('<div class="answer-section answer-IAS role as Secretary">', unsafe_allow_html=True)
-        st.subheader("IAS role as Secretary")
-        st.write(answer8)
-        st.markdown('</div>', unsafe_allow_html=True)
-        doc.add_heading("IAS role as Secretary", level=2)
-        doc.add_paragraph(answer8) 
-        
-        
+        # Add to Word doc
+        doc.add_heading(agent, level=2)
+        doc.add_paragraph(translated_answer)
 
     # =========================
     # DOWNLOAD WORD FILE
@@ -263,13 +211,3 @@ if submitted:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-
-
-
-
-
-
-
-
-
-
