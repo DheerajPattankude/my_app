@@ -1,5 +1,5 @@
 streamlit
 python-docx
-openai
+OpenAI
 googletrans==4.0.0-rc1
 basedpyright
