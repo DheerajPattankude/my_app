@@ -3,7 +3,7 @@ from docx import Document
 from io import BytesIO
 import os
 from openai import OpenAI
-from deep_translator import GoogleTranslator
+from googletrans import Translator
 
 # =========================
 # PAGE CONFIG & STYLE
@@ -92,6 +92,8 @@ client = OpenAI(
     api_key=os.environ["HF_TOKEN"],
 )
 
+translator = Translator()
+
 def query_model_combined(user_prompt, selected_agents):
     """Make one API call for all selected agents with their prompts."""
     try:
@@ -113,11 +115,14 @@ def query_model_combined(user_prompt, selected_agents):
         return f"Error: {str(e)}"
 
 def translate_batch_texts(text_list, target_lang):
-    """Translate all texts in one batch to prevent rate limits."""
-    try:
-        return GoogleTranslator(source="auto", target=target_lang).translate_batch(text_list)
-    except Exception as e:
-        return [f"Translation Error: {str(e)}"] * len(text_list)
+    """Translate texts using googletrans with automatic batching."""
+    translated_texts = []
+    for text in text_list:
+        try:
+            translated_texts.append(translator.translate(text, dest=target_lang).text)
+        except Exception as e:
+            translated_texts.append(f"Translation Error: {str(e)}")
+    return translated_texts
 
 # =========================
 # UI INPUT SECTION
@@ -195,6 +200,7 @@ if submitted and user_question and selected_agents:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
