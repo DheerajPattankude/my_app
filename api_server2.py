@@ -1,9 +1,11 @@
+
 import streamlit as st
 from docx import Document
 from io import BytesIO
 import os
 from openai import OpenAI
 from deep_translator import GoogleTranslator
+import time  # <-- added for delay
 
 # =========================
 # PAGE CONFIG & STYLE
@@ -75,14 +77,14 @@ LANGUAGE_CODES = {
 # SYSTEM PROMPTS FOR AGENTS
 # =========================
 AGENT_PROMPTS = {
-    "Indian Institution Advisor": "you are a best experience lowyer of Indian constitution, give answer in simple language with IPC section and article, also refer previous case study , have references.",
+    "Indian Institution Advisor": "you are a best experience lawyer of Indian constitution, give answer in simple language with IPC section and article, also refer previous case study, have references.",
     "Police Guideline Officer": "You are a police guideline officer in India, Give advice based on Indian law, safety, and real-world procedures.",
     "Lord Krishna": "You are Lord Krishna, answering with wisdom from the Bhagavad Gita, Mahabharata, The Vishnu Purana, Bhagavata Purana, Narada Purana, Garuda Purana, and Vayu Purana in a compassionate tone. Answer will be best and short.",
     "Dr. Ambedkar": "You are Dr. Ambedkar, give answers on your life experience and present time condition with also help of constitution. Answer will be best and short.",
     "Bhagwan Mahaveer": "You are Bhagwan Mahaveer, answering with wisdom from the Jain Agamas or Agam Sutras, teachings of Lord Mahavira, Ang-agams, Upang-agams and Darshan shastra like all holy books in a compassionate tone. Answer will be best and short.",
     "Bhagwan Budda": "You are Bhagwan Gautam Buddha, answering with wisdom from The Tripitaka, Vinaya Pitaka, Sutta Pitaka and Abhidhamma Pitaka in a compassionate tone. Answer will be best and short.",
-    "IAS role as DC": "You are an IAS officer acting as DC of Indian districts, answer a question as IAS DC of India, you have all power of this role, take decision and give best answer,no need to hide, Answer will be best and short.",
-    "IAS role as Secretary": "You are an IAS officer acting as Secretary of Indian states, answer a question as IAS Secretary of India, you have all power of this role, take decision and give best answer, no need to hide, Answer will be best and short."
+    "IAS role as DC": "You are an IAS officer acting as DC of Indian districts, answer a question as IAS DC of India, you have all power of this role, take decision and give best answer, no need to hide. Answer will be best and short.",
+    "IAS role as Secretary": "You are an IAS officer acting as Secretary of Indian states, answer a question as IAS Secretary of India, you have all power of this role, take decision and give best answer, no need to hide. Answer will be best and short."
 }
 
 # =========================
@@ -96,19 +98,10 @@ client = OpenAI(
 def query_model_combined(user_prompt, selected_agents):
     """Make one API call for all selected agents with their prompts."""
     try:
-        # Build combined system + user instructions
         combined_instructions = "You are a multi-role assistant. For each role, follow its unique system prompt and answer separately. Format strictly:\n\n### <Role Name>:\nAnswer...\n\n"
+        role_texts = [f"Role: {agent}\nSystem Prompt: {AGENT_PROMPTS[agent]}\n" for agent in selected_agents]
 
-        role_texts = []
-        for agent in selected_agents:
-            sys_prompt = AGENT_PROMPTS[agent]
-            role_texts.append(f"Role: {agent}\nSystem Prompt: {sys_prompt}\n")
-
-        final_prompt = (
-            f"Question: {user_prompt}\n\n"
-            f"Provide answers for the following roles:\n\n" +
-            "\n".join(role_texts)
-        )
+        final_prompt = f"Question: {user_prompt}\n\nProvide answers for the following roles:\n\n" + "\n".join(role_texts)
 
         response = client.chat.completions.create(
             model="meta-llama/Llama-3.1-8B-Instruct:cerebras",
@@ -122,10 +115,12 @@ def query_model_combined(user_prompt, selected_agents):
     except Exception as e:
         return f"Error: {str(e)}"
 
-def translate_text(text, target_lang):
-    """Translate text to target language using deep_translator."""
+def translate_text_with_delay(text, target_lang):
+    """Translate text with a short delay to prevent rate limits."""
     try:
-        return GoogleTranslator(source="auto", target=target_lang).translate(text)
+        result = GoogleTranslator(source="auto", target=target_lang).translate(text)
+        time.sleep(0.25)  # 4 requests/sec max
+        return result
     except Exception as e:
         return f"Translation Error: {str(e)}"
 
@@ -138,16 +133,9 @@ st.markdown('<div class="ask-section">', unsafe_allow_html=True)
 
 with st.form("query_form"):
     user_question = st.text_area("💬 Ask your question:", height=120)
-    
-    # Language selection
     language = st.selectbox("🌐 Select language:", list(LANGUAGE_CODES.keys()))
-    
-    # Agent selection
     agent_options = list(AGENT_PROMPTS.keys())
-    selected_agents = st.multiselect(
-        "🤝 Select agents to query:", options=agent_options
-    )
-
+    selected_agents = st.multiselect("🤝 Select agents to query:", options=agent_options)
     submitted = st.form_submit_button("🚀 Get Answers")
 
 st.markdown('</div>', unsafe_allow_html=True)
@@ -160,10 +148,9 @@ if submitted and user_question and selected_agents:
     doc.add_heading("AI Agent Responses", level=1)
     lang_code = LANGUAGE_CODES[language]
 
-    # ONE API CALL
     raw_response = query_model_combined(user_question, selected_agents)
 
-    # Parse by role (### markers)
+    # Parse by role
     responses = {}
     for block in raw_response.split("### "):
         if not block.strip():
@@ -174,10 +161,10 @@ if submitted and user_question and selected_agents:
         except:
             continue
 
-    # Display each agent’s response
+    # Display each agent's response with delay to prevent rate limit
     for agent in selected_agents:
         answer = responses.get(agent, "No answer generated.")
-        translated_answer = translate_text(answer, lang_code)
+        translated_answer = translate_text_with_delay(answer, lang_code)
 
         css_class = (
             "answer-edu" if agent == "Indian Institution Advisor" else
@@ -195,7 +182,6 @@ if submitted and user_question and selected_agents:
         st.write(translated_answer)
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Add to Word doc
         doc.add_heading(agent, level=2)
         doc.add_paragraph(translated_answer)
 
@@ -211,3 +197,4 @@ if submitted and user_question and selected_agents:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
