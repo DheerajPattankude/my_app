@@ -2,7 +2,7 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 import os
-from OpenAI import OpenAI
+import OpenAI
 from googletrans import Translator
 
 # =========================
@@ -200,6 +200,7 @@ if submitted and user_question and selected_agents:
         file_name="AI_Agent_Responses.docx",
         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
+
 
 
 
